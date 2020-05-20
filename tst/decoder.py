@@ -29,6 +29,12 @@ class Decoder(nn.Module):
     dropout:
         Dropout probability after each MHA or PFF block.
         Default is ``0.3``.
+    dim_feedforward:
+        Dimension of the feedforward model.
+        Default is ``2048``
+    activation:
+        Activation function for the feedforward model.
+        Default is ``'relu'``
     chunk_mode:
         Swict between different MultiHeadAttention blocks.
         One of ``'chunk'``, ``'window'`` or ``None``. Default is ``'chunk'``.
@@ -41,6 +47,8 @@ class Decoder(nn.Module):
                  h: int,
                  attention_size: int = None,
                  dropout: float = 0.3,
+                 dim_feedforward: int = 2048,
+                 activation: str = 'relu',
                  chunk_mode: str = 'chunk'):
         """Initialize the Decoder block"""
         super().__init__()
@@ -60,7 +68,7 @@ class Decoder(nn.Module):
 
         self._selfAttention = MHA(d_model, q, v, h, attention_size=attention_size)
         self._encoderDecoderAttention = MHA(d_model, q, v, h, attention_size=attention_size)
-        self._feedForward = PositionwiseFeedForward(d_model)
+        self._feedForward = PositionwiseFeedForward(d_model, dim_feedforward, activation)
 
         self._layerNorm1 = nn.LayerNorm(d_model)
         self._layerNorm2 = nn.LayerNorm(d_model)

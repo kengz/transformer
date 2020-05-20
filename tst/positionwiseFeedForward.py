@@ -21,17 +21,19 @@ class PositionwiseFeedForward(nn.Module):
 
     def __init__(self,
                  d_model: int,
-                 d_ff: Optional[int] = 2048):
+                 d_ff: Optional[int] = 2048,
+                 activation: Optional[str] = 'relu'):
         """Initialize the PFF block."""
         super().__init__()
 
         self._linear1 = nn.Linear(d_model, d_ff)
         self._linear2 = nn.Linear(d_ff, d_model)
+        self._activ = getattr(F, activation)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Propagate forward the input through the PFF block.
 
-        Apply the first linear transformation, then a relu actvation,
+        Apply the first linear transformation, then an actvation,
         and the second linear transformation.
 
         Parameters
@@ -43,4 +45,4 @@ class PositionwiseFeedForward(nn.Module):
         -------
             Output tensor with shape (batch_size, K, d_model).
         """
-        return self._linear2(F.relu(self._linear1(x)))
+        return self._linear2(self._activ(self._linear1(x)))
